@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NTB Jump Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <div id="score">Score: 0</div>
+        <div id="game-over" style="display:none;">
+            <h1>Game Over!</h1>
+            <p>Score: <span id="final-score">0</span></p>
+            <button id="restart-btn">Restart</button>
+        </div>
+    </div>
+    <script type="module" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.1/three.module.min.js"></script>
+    <script type="module" src="game.js"></script>
+</body>
+</html>
