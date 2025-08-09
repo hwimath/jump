@@ -1,5 +1,9 @@
 import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.1/three.module.min.js';
 
+// Sound effects
+const jumpSound = new Audio('sounds/jump.mp3'); // Placeholder path
+const gameOverSound = new Audio('sounds/game_over.mp3'); // Placeholder path
+
 // Scene setup
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -147,6 +151,7 @@ function createObstacle() {
     }
 
     obstacle.position.set(spawnX, obstacle.geometry.parameters.height / 2, spawnZ);
+    obstacle.spawnSide = spawnSide; // Store spawn side for removal logic
     scene.add(obstacle);
     obstacles.push(obstacle);
 }
@@ -202,10 +207,28 @@ function updateObstacles() {
         const direction = new THREE.Vector3().subVectors(playerGroup.position, obstacle.position).normalize();
         obstacle.position.add(direction.multiplyScalar(OBSTACLE_SPEED));
 
-        // Remove if out of view (further than player + some margin)
-        // This check needs to be more robust for all directions
-        const distanceToPlayer = obstacle.position.distanceTo(playerGroup.position);
-        if (distanceToPlayer > 50) { // If it has passed the player and is far away
+        const removalMargin = 10; // Distance past the player to remove obstacles
+
+        let shouldRemove = false;
+        if (obstacle.spawnSide === 0) { // Spawned from -Z, moving towards +Z
+            if (obstacle.position.z > playerGroup.position.z + removalMargin) {
+                shouldRemove = true;
+            }
+        } else if (obstacle.spawnSide === 1) { // Spawned from +Z, moving towards -Z
+            if (obstacle.position.z < playerGroup.position.z - removalMargin) {
+                shouldRemove = true;
+            }
+        } else if (obstacle.spawnSide === 2) { // Spawned from -X, moving towards +X
+            if (obstacle.position.x > playerGroup.position.x + removalMargin) {
+                shouldRemove = true;
+            }
+        } else if (obstacle.spawnSide === 3) { // Spawned from +X, moving towards -X
+            if (obstacle.position.x < playerGroup.position.x - removalMargin) {
+                shouldRemove = true;
+            }
+        }
+
+        if (shouldRemove) { // If it has passed the player and is far away
             scene.remove(obstacle);
             obstacles.splice(i, 1);
             i--; // Adjust index after removal
@@ -230,6 +253,7 @@ function checkCollisions() {
 function stopGame() {
     gameOverElement.style.display = 'flex';
     finalScoreElement.textContent = score;
+    gameOverSound.play(); // Play game over sound
     // Disable input or stop animation loop if needed
 }
 
@@ -261,6 +285,7 @@ window.addEventListener('keydown', (event) => {
             if (!isJumping) {
                 isJumping = true;
                 jumpVelocity = JUMP_FORCE;
+                jumpSound.play(); // Play jump sound
             }
             break;
         case 'KeyW':
